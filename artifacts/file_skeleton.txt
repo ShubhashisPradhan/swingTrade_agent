@@ -1,0 +1,57 @@
+swing-trading-agent/
+│
+├── README.md
+├── LICENSE
+├── requirements.txt
+├── config.yaml
+├── .env.example
+├── .gitignore
+│
+├── data/
+│   ├── raw/                    # Unprocessed market data (from Finnhub)
+│   ├── processed/              # Cleaned OHLCV + indicators
+│   ├── cache/                  # Cached daily data
+│   ├── backtest_results/       # Strategy performance reports
+│   └── logs/                   # Log files
+│
+├── notebooks/
+│   ├── 01_exploratory_analysis.ipynb
+│   └── 02_backtesting_research.ipynb
+│
+├── src/
+│   ├── __init__.py
+│   │
+│   ├── agent/
+│   │   ├── __init__.py
+│   │   ├── state.py                 # Central State (Pydantic model)
+│   │   ├── swing_agent_graph.py     # LangGraph workflow definition
+│   │   ├── llm_reasoning.py         # LangChain LLM setup + reasoning
+│   │   │
+│   │   ├── tools/                   # All nodes’ tools here
+│   │   │   ├── __init__.py
+│   │   │   ├── data_tools.py        # Market data fetching
+│   │   │   ├── indicator_tools.py   # Technical indicators
+│   │   │   ├── sentiment_tools.py   # News & sentiment
+│   │   │   ├── signal_tools.py      # Pullback / breakout detection
+│   │   │   ├── scoring_tools.py     # Scoring & ranking
+│   │   │   └── reporting_tools.py   # Report & Streamlit integration
+│   │
+│   └── utils/
+│       ├── __init__.py
+│       ├── logger.py                # Log configuration
+│       ├── cache_manager.py         # Cache layer (load/save)
+│       └── config_loader.py         # Read config.yaml and .env
+│
+├── scripts/
+│   ├── run_swing_agent.py           # Entrypoint for daily execution
+│   ├── run_backtest.py              # Run backtests
+│   └── run_data_update.py           # Update market data cache
+│
+├── ui/
+│   ├── streamlit_app.py             # Interactive dashboard
+│   └── components/                  # Plot utilities or report cards
+│
+└── tests/
+    ├── test_data_tools.py
+    ├── test_signal_tools.py
+    └── test_agent_workflow.py
