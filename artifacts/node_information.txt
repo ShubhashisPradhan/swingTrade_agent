@@ -1,0 +1,233 @@
+🧩 Node-wise Tool Design
+🟢 1️⃣ Start Node
+
+    Purpose:
+    Initialize the workflow — define symbols, config, and start time.
+
+    Tools / Functions:
+
+        load_config() → reads config.yaml
+        initialize_state() → sets initial state fields
+
+        Inputs: None
+        Outputs to State:
+
+        {
+        "symbols": ["RELIANCE.NS", "TCS.NS", "INFY.NS", "SBIN.NS"],
+        "start_time": "2025-10-22T09:15:00",
+        "capital": 100000,
+        "risk_per_trade": 0.01
+        }
+
+        Frameworks:
+        YAML, Python datetime, dotenv
+
+🟠 2️⃣ Fetch Market Data Node
+
+    Purpose:
+    Pull historical + latest OHLCV data from APIs (Finnhub, fallback Yahoo).
+
+        Tools / Functions:
+
+        fetch_historical_data(symbols, timeframe='1d')
+        fetch_realtime_data(symbols)
+        combine_dataframes()
+
+        Inputs: symbols
+        Outputs to State:
+
+        "market_data": {
+        "RELIANCE.NS": <DataFrame>,
+        "TCS.NS": <DataFrame>,
+        ...
+        }
+
+
+        Frameworks / APIs:
+        🧰 finnhub-python, yfinance, aiohttp, pandas
+
+✅ Parallelizable (async fetch per stock)
+
+🟡 3️⃣ Compute Indicators Node
+
+    Purpose:
+    Compute all technical indicators (EMA, RSI, MACD, ATR, Volume MA).
+
+    Tools / Functions:
+
+        calculate_ema(df, periods=[20,50])
+        calculate_macd(df, fast=12, slow=26, signal=9)
+        calculate_rsi(df, period=14)
+        calculate_atr(df, period=14)
+        calculate_vol_ma(df, period=20)
+        .....
+        Inputs: market_data
+        Outputs:
+
+        "indicators": {
+        "RELIANCE.NS": {"EMA20": ..., "RSI": ..., "MACD": ...},
+        "TCS.NS": {...}
+        }
+
+
+    Frameworks:
+    ta library, pandas, numpy
+
+✅ Parallelizable per stock
+
+🔵 4️⃣ Fetch News & Sentiment Node
+
+    Purpose:
+    Fetch company news headlines & compute sentiment score.
+
+    Tools / Functions:
+
+    fetch_company_news(symbol)
+
+    compute_sentiment_score(text) → using LLM or VADER
+
+    summarize_news_sentiment(symbol)
+
+    Inputs: symbols
+    Outputs:
+
+    "sentiment": {
+    "RELIANCE.NS": {"score": 0.75, "tone": "Positive"},
+    "TCS.NS": {"score": -0.20, "tone": "Negative"}
+    }
+
+
+    Frameworks:
+    finnhub-python, langchain, transformers, or TextBlob/VADER
+
+✅ Runs in parallel with indicator computation
+
+🟣 5️⃣ Merge Features + Generate Signals Node
+
+    Purpose:
+    Merge technical + sentiment features, detect actionable trade signals.
+
+    Tools / Functions:
+
+    merge_features(indicators, sentiment)
+
+    detect_trend_pullback(df)
+
+    detect_breakout(df)
+
+    detect_mean_reversion(df)
+
+    Inputs:
+    indicators, sentiment, market_data
+    Outputs:
+
+    "signals": {
+    "RELIANCE.NS": {"type": "pullback", "strength": 0.82},
+    "TCS.NS": {"type": "breakout", "strength": 0.70}
+    }
+
+
+    Frameworks:
+    Custom Python logic using Pandas & TA indicators
+
+🟤 6️⃣ Score Candidates Node
+
+    Purpose:
+    Compute rule-based composite score for each stock (trend, momentum, sentiment, risk/reward).
+
+    Tools / Functions:
+
+    calculate_score(signal, sentiment, volatility)
+
+    rank_candidates(scores, top_n=5)
+
+    filter_by_risk(signal, atr, capital)
+
+    Inputs: signals, sentiment, market_data, config
+    Outputs:
+
+    "scores": {
+    "RELIANCE.NS": 0.88,
+    "TCS.NS": 0.71
+    },
+    "top_candidates": ["RELIANCE.NS", "TCS.NS"]
+
+
+    Frameworks:
+    scikit-learn (optional), Pandas
+
+🔴 7️⃣ LLM Reasoner Node (LangChain)
+
+    Purpose:
+    Ask the LLM (GPT-5 / Claude / Llama3) to summarize and explain insights for top candidates.
+
+    Tools / Functions (LangChain Tools):
+
+    Tool(name="get_signal_summary", func=get_signal_summary)
+
+    Tool(name="get_sentiment_summary", func=get_sentiment_summary)
+
+    Tool(name="recommend_trades", func=compose_trade_plan)
+
+    Inputs: scores, signals, sentiment, market_data
+    Outputs:
+
+    "llm_output": {
+    "summary": "RELIANCE shows strong EMA alignment and positive sentiment.",
+    "trade_plan": {
+        "entry": 3100,
+        "stop": 3050,
+        "target": 3250,
+        "confidence": 0.83
+    }
+    }
+
+
+    Frameworks:
+    LangChain, langchain-openai, LangGraph, LangSmith
+
+⚫ 8️⃣ Generate Daily Report Node
+
+    Purpose:
+    Compile LLM output + top trade data → structured report for UI/alert.
+
+    Tools / Functions:
+
+    generate_markdown_report(top_candidates, llm_output)
+
+    send_to_slack(report) (optional)
+
+    update_streamlit_dashboard(report)
+
+    Inputs: llm_output, scores, signals
+    Outputs:
+
+    "report": "# Daily Swing Picks\n1️⃣ RELIANCE – Entry 3100, Target 3250 (Strong Uptrend)"
+
+
+    Frameworks:
+    streamlit, jinja2 (for report templates), slack-sdk (optional)
+
+⚙️ 9️⃣ Utility Nodes (Supporting / Parallel)
+        Utility Node	Description	Tools / Frameworks
+        Retry Node	Handles API failures / rate limits	LangGraph retry policy
+        Cache Node	Stores previous data in /data/cache/	joblib, pickle
+        Checkpoint Node	Saves intermediate state	LangGraph persistence
+        Logging Node	Logs results to DB or CSV	loguru, sqlite3, pandas
+🧠 Summary Table — Node vs Tools
+        Node	Description	Tools/Functions	Frameworks/APIs
+        Start Node	Initialize symbols/config	load_config, init_state	yaml, dotenv
+        Fetch Market Data	Get OHLCV	fetch_historical_data, fetch_realtime_data	finnhub, yfinance, aiohttp
+        Compute Indicators	Calculate EMA, RSI, MACD	calculate_ema, calculate_rsi, calculate_macd	ta, pandas
+        Fetch Sentiment	News & tone	fetch_company_news, compute_sentiment	finnhub, transformers
+        Merge + Signals	Combine & detect setups	detect_trend_pullback, detect_breakout	pandas, numpy
+        Score Candidates	Rank stocks	calculate_score, filter_by_risk	sklearn, numpy
+        LLM Reasoner	AI insights	recommend_trades, Tool()	LangChain, OpenAI
+        Report Generator	Output report	generate_report, send_to_ui	streamlit, jinja2
+        Utilities	Caching, Logging, Retry	save_state, log_event	loguru, LangGraph
+🧩 Parallelism Plan
+    Parallel    Branch	Nodes	                        Description
+    Branch A	Fetch Market Data → Compute Indicators	Technical Analysis
+    Branch B	Fetch News → Compute Sentiment	        Fundamental + Sentiment
+    Merge Point	Merge Features + Signals	            Combines A + B outputs
+    Sequential	Score → LLM → Report	                Core reasoning & output

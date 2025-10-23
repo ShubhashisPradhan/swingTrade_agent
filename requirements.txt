@@ -1,0 +1,49 @@
+# --- Core Python Utilities ---
+python-dotenv==1.0.1           # Load .env variables for API keys
+PyYAML==6.0.2                  # For config.yaml handling
+pydantic==2.9.2                # For typed State models
+
+# --- Data Handling & Computation ---
+pandas==2.2.3
+numpy==1.26.4
+requests==2.32.3
+aiohttp==3.10.5                # Async API calls for parallel data fetching
+tqdm==4.66.5                   # Progress bars for data loads
+
+# --- Financial Data APIs ---
+finnhub-python==2.4.21         # Real-time & historical stock data
+yfinance==0.2.44               # Backup data source
+nsepython==0.0.973             # NSE India free quote data (optional)
+ta==0.11.0                     # Technical indicators (EMA, RSI, MACD)
+
+# --- Quant & Backtesting ---
+vectorbt==0.26.1               # Fast vectorized backtesting
+backtesting==0.3.3             # Rule-based backtest validation
+scikit-learn==1.5.2            # Optional ML-based scoring
+numba==0.60.0                  # JIT optimization for vectorbt
+
+# --- LLM / Agent Framework ---
+langchain==0.3.7
+langchain-core==0.3.19
+langgraph==0.2.14
+langsmith
+langchain-openai==0.2.6        # OpenAI GPT-5 API client
+openai==1.51.0
+tiktoken==0.8.0                # Token counting for GPT cost tracking
+
+# --- UI / Visualization ---
+streamlit==1.39.0              # Dashboard & front-end
+plotly==5.24.1                 # Interactive charting
+matplotlib==3.9.2              # Static plots
+seaborn==0.13.2                # Additional chart styling (optional)
+
+# --- API / Automation ---
+fastapi==0.115.2               # REST API layer (optional)
+uvicorn==0.32.0                # API server
+schedule==1.2.2                # Simple cron-like scheduling
+prefect==3.1.2                 # Optional orchestration if not using Airflow
+
+# --- Logging / Monitoring ---
+loguru==0.7.3                  # Structured logging
+rich==13.9.2                   # Pretty terminal output
+prometheus-client==0.20.0      # Metrics export (optional)

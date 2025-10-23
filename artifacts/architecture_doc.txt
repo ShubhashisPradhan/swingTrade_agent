@@ -1,0 +1,94 @@
+🧩 2️⃣ Roles & Hierarchy
+🧱 LangChain
+
+Defines tools (Python functions) → e.g., fetch_market_data, compute_signals, score_candidates.
+Defines chains (prompt + model + logic).
+Integrates LLMs (GPT-5 / Claude / Llama 3).
+
+🔁 LangGraph
+
+Builds a graph of nodes (steps) where each node can be:
+an LLM chain,
+a tool,
+or a conditional decision.
+Enables feedback loops (like “analyze → act → re-analyze”).
+Provides deterministic control flow (unlike plain LangChain agents, which can drift).
+
+🔍 LangSmith
+
+Monitors every LLM and tool call (inputs, outputs, token usage, latency).
+Allows you to trace, debug, and compare agent runs visually.
+Helps optimize costs & performance (critical for real-time swing trading).
+
+                    ┌─────────────────────────────────────────┐
+                    │           LangGraph Agent Flow          │
+                    │─────────────────────────────────────────│
+                    │ Nodes represent:                        │
+                    │   • DataFetcher (Finnhub)               │
+                    │   • IndicatorEngine (EMA, RSI, MACD)    │
+                    │   • SignalAnalyzer (trend/breakout)     │
+                    │   • ScoringEngine (rank & risk filter)  │
+                    │   • LLMReasoner (GPT-5 / LangChain)     │
+                    │   • ReportGenerator (insight summary)   │
+                    │ Edges define: data flow & conditions    │
+                    └─────────────────────────────────────────┘
+                                    │
+                                    ▼
+      ┌────────────────────────────────────────────────────┐
+      │                     LangChain                      │
+      │────────────────────────────────────────────────────│
+      │ LLMs (GPT-5, Claude) + Tools + Chains + Memory     │
+      │ Tools: get_data, compute_indicators, score_stocks  │
+      │ Memory: store previous day’s trade context         │
+      └────────────────────────────────────────────────────┘
+                                    │
+                                    ▼
+      ┌────────────────────────────────────────────────────┐
+      │                    LangSmith                       │
+      │────────────────────────────────────────────────────│
+      │ Trace every node, tool, and LLM invocation          │
+      │ Visual dashboards for latency & cost analysis       │
+      │ Debug failing runs, visualize agent graph           │
+      └────────────────────────────────────────────────────┘
+
+
+
+          ┌──────────────┐
+          │ Start Node   │
+          └─────┬────────┘
+                ▼
+     ┌────────────────────┐
+     │ Fetch Market Data  │
+     └─────┬──────────────┘
+           ▼
+┌────────────────────────────┬────────────────────────────┐
+│ Compute Indicators (async) │ Compute News Sentiment     │
+└──────────┬──────────────── ┴───────────┬────────────────┘
+           ▼                            ▼
+      ┌────────────────────────────────────────────────┐
+      │ Generate Signals + Score Candidates (Parallel)  │
+      └──────────────────────────┬──────────────────────┘
+                                 ▼
+                      ┌────────────────────┐
+                      │  LLM Reasoner Node │
+                      │ (Summarize + Rank) │
+                      └────────┬───────────┘
+                               ▼
+                     ┌─────────────────────┐
+                     │ Generate Report/UI  │
+                     └─────────────────────┘
+
+
+
+
+# state
+
+
+class SwingAgentState(BaseModel):
+    symbols: list[str]
+    market_data: dict[str, dict]
+    indicators: dict[str, dict] | None = None
+    signals: dict[str, dict] | None = None
+    scores: dict[str, float] | None = None
+    llm_summary: str | None = None
+    report: str | None = None
