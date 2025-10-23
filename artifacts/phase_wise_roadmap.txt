@@ -1,0 +1,269 @@
+⚙️ Phase 1: Project Initialization (Setup & Environment)
+
+            Goal:
+            Create a clean, reproducible development environment and folder structure.
+
+            Tasks:
+
+            Initialize GitHub repo (swing-trading-agent)
+            Run the setup script → generate folders & empty skeleton files
+            Create and activate Python virtual environment
+            Install dependencies from requirements.txt
+            Create .env and config.yaml for storing API keys and parameters
+            
+            Deliverables:
+
+            ✅ Verified folder structure
+            ✅ Config file ready
+            ✅ API keys working (FINNHUB_API_KEY, OPENAI_API_KEY)
+
+            Next Step Output:
+
+            Repo ready → “Hello World” test confirming Finnhub + LLM API connectivity
+
+📡 Phase 2: Data Layer Development
+
+            Goal:
+            Build the data ingestion engine to fetch, cache, and serve market data.
+
+            Modules to implement:
+
+            data_tools.py → async fetch (Finnhub / yfinance fallback)
+            cache_manager.py → local caching with timestamp validation
+            config_loader.py → handle config + .env parsing
+
+            Tasks:
+
+            Fetch OHLCV for multiple symbols concurrently (async)
+            Store in /data/processed/ as .parquet
+            Implement simple caching (avoid re-fetching same-day data)
+
+            Log activity (logger.py)
+
+            Deliverables:
+
+            ✅ Data fetching working
+            ✅ Cached results available
+            ✅ Logs generated
+
+            Output Example:
+
+            Fetched: RELIANCE.NS, TCS.NS, INFY.NS (2025-10-22)
+            Saved to /data/processed/
+
+🧮 Phase 3: Indicator & Feature Engineering
+
+            Goal:
+            Compute technical indicators required for swing trading logic.
+
+            Modules to implement:
+            indicator_tools.py → EMA, RSI, MACD, ATR, Volume MA
+            feature_engineer.py (optional) → combine with volatility, volume stats
+
+            Tasks:
+            Add compute_indicators(df) function
+            Validate computed columns visually (with sample plots)
+            Save enriched DataFrame to /data/processed/indicators/
+
+            Deliverables:
+            ✅ Indicators calculated for each symbol
+            ✅ Plots verified (EMA alignment, RSI ranges, MACD divergence)
+
+            Output Example:
+            RELIANCE: EMA20=3055, EMA50=3022, RSI=58.3, MACD=12.4
+
+⚖️ Phase 4: Signal Generation (Trade Logic)
+
+            Goal:
+            Detect actionable swing signals from indicator data.
+
+            Modules:
+            signal_tools.py
+            signal_definitions.yaml (optional config for conditions)
+
+            Tasks:
+            Implement 3 signal detectors:
+            EMA Pullback (trend continuation)
+            Breakout above resistance
+            Mean Reversion (oversold bounce)
+            Store detected signals to state.signals
+
+            Deliverables:
+            ✅ Signal detection logic working
+            ✅ Each stock classified (Buy / Watch / Neutral)
+
+            Output Example:
+
+            RELIANCE → PULLBACK (strength=0.82)
+            TCS → BREAKOUT (strength=0.77)
+
+🧠 Phase 5: Sentiment & News Analysis
+
+            Goal:
+            Add qualitative layer — understand sentiment from recent news.
+
+            Modules:
+            sentiment_tools.py → fetch + analyze
+            Integrate into parallel LangGraph branch
+
+            Tasks:
+            Fetch 5-day news via Finnhub /company-news
+            Compute sentiment score using TextBlob or LLM summarizer
+            Merge sentiment score into the agent’s state
+
+            Deliverables:
+            ✅ Sentiment scores for each stock
+            ✅ Merged with technical signals
+
+            Output Example:
+
+            RELIANCE: Sentiment +0.72 → bullish confirmation
+            TCS: Sentiment -0.18 → avoid trade
+
+🧾 Phase 6: Scoring & Ranking Engine
+
+            Goal:
+            Quantify trade attractiveness based on signals, sentiment, and volatility.
+
+            Modules:
+            scoring_tools.py
+            rule_based_score.py (optional)
+
+            Tasks:
+            Define weighted scoring formula
+            Score = 0.5 * SignalStrength + 0.3 * Sentiment - 0.2 * ATR_factor
+
+
+            Normalize scores to 0–1
+            Rank and store top N candidates in state.scores
+
+            Deliverables:
+            ✅ Ranked swing candidates
+            ✅ Score file (ranked_candidates.json)
+
+            Output Example:
+
+            1️⃣ RELIANCE.NS → 0.88
+            2️⃣ TCS.NS → 0.74
+            3️⃣ INFY.NS → 0.63
+
+🤖 Phase 7: LLM Reasoner (LangChain Integration)
+
+            Goal:
+            Add explainability and reasoning to generate insights and recommendations.
+
+            Modules:
+            llm_reasoning.py
+            LangChain tools in swing_agent_graph.py
+
+            Tasks:
+            Connect GPT-5 (or Claude/Llama3)
+            Use prompt templates for:
+            Trade reasoning
+            Signal explanation
+            Summary generation
+
+            Return structured JSON (entry, stop, target, confidence)
+
+            Deliverables:
+            ✅ Working LLM call
+            ✅ Output JSON and readable explanation
+
+            Output Example:
+
+            {
+              "symbol": "RELIANCE.NS",
+              "setup": "EMA Pullback",
+              "entry": 3100,
+              "stop": 3050,
+              "target": 3250,
+              "confidence": 0.83,
+              "summary": "Price retracing to EMA20 within bullish trend."
+            }
+
+🧩 Phase 8: LangGraph Orchestration
+
+            Goal:
+            Combine all modules into a connected, traceable workflow.
+
+            Modules:
+            swing_agent_graph.py
+            state.py (finalized)
+
+            Tasks:
+            Define nodes (fetch_data, compute_indicators, compute_sentiment, etc.)
+            Connect them using LangGraph edges
+            Enable async parallelism (compute_indicators & compute_sentiment in parallel)
+            Test full pipeline execution with sample symbols
+
+            Deliverables:
+
+            ✅ Graph executes end-to-end
+            ✅ State updated through all stages
+            ✅ Visualized in LangSmith dashboard
+
+📊 Phase 9: Reporting & Visualization (Streamlit)
+
+            Goal:
+            Show daily swing trade insights in a friendly UI.
+
+            Modules:
+            reporting_tools.py
+            ui/streamlit_app.py
+
+            Tasks:
+            Generate markdown report from top candidates
+
+            Build Streamlit dashboard with:
+            Top trades
+            Charts (Plotly)
+            LLM explanations
+
+            Deliverables:
+            ✅ Interactive dashboard (streamlit run ui/streamlit_app.py)
+            ✅ Reports refreshed daily
+
+⚙️ Phase 10: Automation & Monitoring
+
+            Goal:
+            Schedule runs and monitor performance.
+
+            Modules:
+            scripts/run_swing_agent.py
+            LangSmith tracing & logging
+
+            Tasks:
+            Add schedule or Airflow to run daily
+            Enable LangSmith tracing (monitor latency, token cost)
+            Log backtest results and daily performance
+
+            Deliverables:
+            ✅ Daily automation working
+            ✅ Performance monitored via LangSmith + log files
+
+🧠 Phase 11: Backtesting & Validation
+
+            Goal:
+            Evaluate historical performance of signals and scoring logic.
+
+            Modules:
+            backtesting/strategy_runner.py (optional)
+            vectorbt integration
+
+            Deliverables:
+            ✅ Backtest metrics (CAGR, Sharpe, Max Drawdown)
+            ✅ Performance visualization reports
+
+☁️ Phase 12: Deployment & Scaling
+
+            Goal:
+            Make the system production-ready.
+
+            Tasks:
+            Containerize with Docker
+            Host on cloud (AWS / GCP / Render)
+            Add logging and monitoring
+
+            Deliverables:
+            ✅ Cloud-deployed app
+            ✅ Automated daily insights
