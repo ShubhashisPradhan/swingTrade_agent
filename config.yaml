@@ -1,0 +1,12 @@
+data_source: "yfinance"
+symbols:
+  - RELIANCE.NS
+  - TCS.NS
+  - INFY.NS
+fetch:
+  period: "6mo"
+  interval: "1d"
+cache:
+  enabled: true
+  path: "data/processed"
+  freshness_days: 1
