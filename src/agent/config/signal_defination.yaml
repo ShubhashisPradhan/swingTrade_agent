@@ -1,0 +1,103 @@
+# ============================================================
+# Signal Detection Configuration (Phase 4++)
+# ============================================================
+# Tunable thresholds, lookbacks, and weights for all 10 detectors.
+# These settings govern how technical indicator signals are interpreted
+# for swing-trading logic.
+# ------------------------------------------------------------
+
+# 1️⃣ EMA Pullback — Trend Continuation
+pullback:
+  ema_fast: 20              # Fast EMA period (default: 20)
+  ema_slow: 50              # Slow EMA period (default: 50)
+  near_pct: 0.02            # Price within ±2% of fast EMA
+  rsi_low: 40               # RSI lower bound (to confirm uptrend pullback)
+  rsi_high: 55              # RSI upper bound for valid retracement
+  momentum_min: 0           # Minimum MOM (momentum) value for confirmation
+
+# 2️⃣ Breakout — Momentum Continuation
+breakout:
+  donchian_period: 20       # Lookback for breakout high
+  volume_ratio: 1.3         # Volume > 1.3× rolling mean
+  macd_positive: true       # Require MACD > signal
+  min_strength: 0.5         # Threshold to consider valid breakout
+
+# 3️⃣ Mean Reversion — Oversold Bounce
+mean_reversion:
+  rsi_oversold: 30          # RSI below 30 triggers oversold condition
+  macdh_window: 3           # MACDh must be rising for N periods
+  price_recovery_pct: 0.5   # Close must recover ≥0.5% from last candle
+  min_strength: 0.4
+
+# 4️⃣ Bollinger Breakout — Volatility Expansion
+bollinger:
+  period: 20                # Bollinger window
+  n_std: 2                  # Number of std deviations for band
+  breakout_distance_min: 0.01   # Price must exceed band by ≥1%
+  min_strength: 0.3
+
+# 5️⃣ MACD Crossover — Trend Reversal
+macd:
+  min_diff: 0.0             # MACD - Signal threshold
+  confirm_histogram: true   # Require MACD histogram positive for bullish
+  lookback_confirm: 3       # Confirm persistence for N bars
+
+# 6️⃣ RSI Divergence — Momentum Weakness / Strength Reversal
+rsi_divergence:
+  lookback: 14              # RSI lookback window
+  price_change_min: 0.01    # Min price change to qualify as new high/low
+  divergence_strength_scale: 0.5  # Scale divergence strength impact
+  confirm_trend_flip: true
+
+# 7️⃣ PSAR Flip — Direction Change Confirmation
+psar:
+  use_psar: true
+  sensitivity: 0.02         # Acceleration factor (same as in TA)
+  min_distance_pct: 0.005   # PSAR must move ≥0.5% of price to count
+  confirm_with_close: true
+
+# 8️⃣ Heikin-Ashi Trend — Smoothed Trend Filter
+heikin_ashi:
+  use_ha: true
+  min_body_ratio: 0.5       # |HA_close - HA_open| / (HA_high - HA_low)
+  bullish_bias_only: false  # Whether to ignore bearish HA signals
+  confirm_period: 3
+
+# 9️⃣ CCI Extreme — Overbought/Oversold Mean Reversal
+cci:
+  upper: 100
+  lower: -100
+  extreme_threshold: 150    # Optional second-level alert
+  lookback_confirm: 3
+
+# 🔟 Volatility Expansion — ATR/KC/BB Width Surge
+volatility:
+  atr_period: 14
+  kc_multiplier: 2.0
+  bbw_quantile: 0.8         # BB width above 80th percentile → breakout
+  atr_surge_ratio: 1.25     # ATR must be 25% above mean
+  confirm_with_kc: true
+
+# ============================================================
+# Aggregation Weights — Control signal importance in final ranking
+# ============================================================
+aggregation:
+  weights:
+    PULLBACK: 0.15
+    BREAKOUT: 0.20
+    MEAN_REV: 0.10
+    BOLLINGER_BREAKOUT: 0.10
+    MACD_CROSS: 0.10
+    RSI_DIVERGENCE: 0.07
+    PSAR_FLIP: 0.06
+    HA_TREND: 0.06
+    CCI_EXTREME: 0.06
+    VOL_EXPANSION: 0.10
+
+# ============================================================
+# Output Settings
+# ============================================================
+output:
+  min_signal_strength: 0.3   # Minimum strength threshold for reporting
+  save_to_json: true          # Save state to src/agent/states/signals.json
+  precision: 3                # Round strength values

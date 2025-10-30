@@ -1,0 +1,18 @@
+{
+  "2025-10-30": {
+    "RELIANCE.NS": [
+      {
+        "signal": "VOL_EXPANSION",
+        "score": 0.095
+      },
+      {
+        "signal": "HA_TREND",
+        "score": 0.04554
+      },
+      {
+        "signal": "CCI_EXTREME",
+        "score": 0.00378
+      }
+    ]
+  }
+}

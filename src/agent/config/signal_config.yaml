@@ -1,0 +1,83 @@
+# ============================================================
+# SIGNAL CONFIGURATION FILE
+# ============================================================
+# Defines each signal’s direction, weight, and dynamic behavior.
+# Also includes thresholds and volatility settings for aggregation logic.
+# ============================================================
+
+signals:
+
+  # Volatility Expansion — bullish during volatility surge
+  VOL_EXPANSION:
+    weight: 0.4
+    direction: bullish
+    min_score: 0.02          # Ignore signals weaker than this
+    adaptive: true            # Weight adapts with volatility
+
+  # Heikin Ashi Trend — smoothed bullish trend confirmation
+  HA_TREND:
+    weight: 0.4
+    direction: bullish
+    min_score: 0.01
+    adaptive: false
+
+  # Commodity Channel Index — bearish when CCI > +100
+  CCI_EXTREME:
+    weight: 0.2
+    direction: bearish
+    min_score: 0.01
+    adaptive: false
+
+  # RSI Overbought — bearish reversal signal
+  RSI_OVERBOUGHT:
+    weight: 0.3
+    direction: bearish
+    min_score: 0.05
+    adaptive: true
+
+  # RSI Oversold — bullish rebound signal
+  RSI_OVERSOLD:
+    weight: 0.3
+    direction: bullish
+    min_score: 0.05
+    adaptive: true
+
+  # MACD Crossover — bullish if MACD > Signal line
+  MACD_CROSSOVER:
+    weight: 0.5
+    direction: bullish
+    min_score: 0.03
+    adaptive: true
+
+  # Price Reversal — bearish when sharp down candle or reversal pattern
+  PRICE_REVERSAL:
+    weight: 0.4
+    direction: bearish
+    min_score: 0.03
+    adaptive: false
+
+# ============================================================
+# GLOBAL STRATEGY SETTINGS
+# ============================================================
+
+aggregation:
+  normalize_method: tanh          # ['sigmoid', 'tanh', 'linear']
+  bullish_bias_factor: 1.0        # extra weight for bullish trend context
+  bearish_bias_factor: 1.0
+  volatility_influence: 0.4       # scale of volatility multiplier (0–1)
+  allow_negative_contributions: true
+
+thresholds:
+  buy_threshold: 0.10             # normalized signal > 0.10 → BUY
+  sell_threshold: -0.10           # normalized signal < -0.10 → SELL
+  hold_threshold: 0.05            # between ±0.05 → WATCH
+  min_confidence: 0.03            # below this → NEUTRAL
+  volatility_clip: [0.8, 1.2]     # confidence scaling range
+  volatility_feature: Volatility_Score  # column name used in df
+
+output:
+  round_digits: 4
+  save_to_json: true
+  json_path: src/agent/states/signals.json
+  include_reasoning: true
+  print_summary: true
